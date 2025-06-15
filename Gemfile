@@ -3,7 +3,6 @@ source "https://rubygems.org"
 ruby "3.1.4"
 gem "rails", "~> 7.1.2"
 gem "sprockets-rails"
-gem "mysql2", "~> 0.5"
 gem "puma", ">= 5.0"
 gem "importmap-rails"
 gem "turbo-rails"
@@ -29,6 +28,7 @@ gem 'aws-sdk-s3', require: false
 gem 'wicked_pdf'
 
 group :development, :test do
+  gem "mysql2", "~> 0.5"  # MySQLは開発/テスト環境のみ
   gem "debug", platforms: %i[ mri windows ]
   gem 'pry-rails'
 end
@@ -45,8 +45,7 @@ group :test do
   gem "selenium-webdriver"
 end
 
-
 group :production do
   gem 'rails_12factor'
-  gem 'pg', '~> 1.5'
+  gem 'pg', '~> 1.5'  # 本番環境はPostgreSQL
 end
