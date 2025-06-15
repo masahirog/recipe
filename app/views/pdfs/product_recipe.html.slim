@@ -1,0 +1,74 @@
+.header-container
+  .header
+    span.title レシピ指示書 - #{@product.name}
+    span.print-time 印刷: #{Time.now.strftime('%Y/%m/%d %H:%M')}
+
+.product-header
+  h2.product-name = @product.name
+  .product-info
+    span.info-item
+      span.info-label カテゴリ:
+      span.info-value = @product.category_i18n
+    span.info-item
+      span.info-label 製造数:
+      span.info-value 1人前
+    span.info-item
+      span.info-label 売価:
+      span.info-value = "#{@product.sell_price}円"
+    span.info-item
+      span.info-label 原価:
+      span.info-value = "#{@product.cost_price}円"
+    span.info-item
+      span.info-label 原価率:
+      span.info-value = "#{((@product.cost_price/@product.sell_price)*100).round(1)}%"
+
+hr.section-divider
+
+- product_menus = @product.product_menus.includes(menu: { menu_materials: :material })
+- if product_menus.any?
+  - product_menus.each do |product_menu|
+    - menu = product_menu.menu
+    - if menu.category != '容器' # カテゴリが「容器」でない場合のみ表示
+      .menu-section
+        h3.menu-title = menu.name
+        
+        - if menu.menu_materials.any?
+          table.materials-table
+            colgroup
+              col style="width: 40%"
+              col style="width: 5%"
+              col style="width: 12%"
+              col style="width: 8%"
+              col style="width: 35%"
+            thead
+              tr
+                th.text-center 材料名
+                th.text-center ✔
+                th.text-center 分量
+                th.text-center 調味料G
+                th.text-center 調理区分
+            tbody
+              - menu.menu_materials.order(:row_order).each do |menu_material|
+                - if menu_material.material.present?
+                  tr
+                    td = menu_material.material.name
+                    td.text-center.checkbox-cell □
+                    td.text-center 
+                      = "#{format_number(menu_material.amount_used)} #{menu_material.material.recipe_unit}"
+                    td.text-center = menu_material.source_group.present? ? menu_material.source_group : "—"
+                    td.text-center = menu_material.preparation.present? ? menu_material.preparation : "—"
+      
+      - if menu.cook_before.present? || menu.cook_on_the_day.present?
+        table.process-table
+          tr
+            - if menu.cook_before.present?
+              td.process-cell
+                .process-title 前日工程
+                .process-content = simple_format(menu.cook_before)
+            - if menu.cook_on_the_day.present?
+              td.process-cell
+                .process-title 当日工程
+                .process-content = simple_format(menu.cook_on_the_day)
+
+- else
+  p.no-recipe.text-center ※このアイテムにはレシピ情報がありません
