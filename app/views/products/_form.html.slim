@@ -7,7 +7,11 @@
         - product.errors.full_messages.each do |message|
           li = message
   #message-container
-
+  - if product.persisted?
+    .mb-3.text-end
+      = link_to product_recipe_pdfs_path(product_id: product.id, format: :pdf), target: "_blank", class: "btn btn-info" do
+        i.bi.bi-printer-fill.me-1
+        | レシピ印刷（1人前）
   .card.mb-4
     .card-header.bg-light
       h5.mb-0 基本情報
