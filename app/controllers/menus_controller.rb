@@ -3,7 +3,7 @@ class MenusController < ApplicationController
 
 
   def details
-    @menu = Menu.includes(menu_materials: { material: :material_allergies }).find(params[:id])
+    @menu = Menu.includes(:menu_materials).find(params[:id])
     
     # 材料情報を取得
     menu_materials_data = @menu.menu_materials.map do |mm|
@@ -12,20 +12,12 @@ class MenusController < ApplicationController
         material_id: mm.material_id,
         name: mm.material.name,
         amount_used: mm.amount_used,
-        unit: mm.material.recipe_unit_i18n, # enumの国際化された名前
+        unit: mm.material.recipe_unit, # enumの国際化された名前
         preparation: mm.preparation,
         cost_price: mm.cost_price
       }
     end
-    
-    # アレルギー情報を取得
-    allergens = []
-    @menu.menu_materials.each do |mm|
-      next unless mm.material
-      mm.material.material_allergies.each do |ma|
-        allergens << [ma.allergen, MaterialAllergy.allergens_i18n[ma.allergen]] if ma.allergen.present?
-      end
-    end
+  
     
     respond_to do |format|
       format.json do
@@ -39,8 +31,7 @@ class MenusController < ApplicationController
           lipid: @menu.lipid,
           carbohydrate: @menu.carbohydrate,
           salt: @menu.salt,
-          menu_materials: menu_materials_data,
-          allergens: allergens.uniq
+          menu_materials: menu_materials_data
         }
       end
     end

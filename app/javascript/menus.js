@@ -5,7 +5,6 @@ function onLoad() {
     var card = $(this).closest('.product-menu-item');
     var menuInfo = card.find('.menu-info');
     var materialsList = card.find('.materials-list');
-    var allergensList = card.find('.allergens-list');
     
     // 編集リンクの更新 - 左側の編集ボタンコンテナを探す
     var editButtonsContainer = card.find('.edit-buttons-container');
@@ -36,7 +35,6 @@ function onLoad() {
     }
     menuInfo.removeClass('d-none');
     materialsList.html('<div class="text-center"><small>読み込み中...</small></div>');
-    allergensList.html('<div class="text-center"><small>読み込み中...</small></div>');
     
     
     $.ajax({
@@ -88,26 +86,12 @@ function onLoad() {
           materialsList.html('<div class="text-center"><small class="text-muted">登録されている材料はありません</small></div>');
         }
 
-        // アレルギー情報を表示
-        if (data.allergens && data.allergens.length > 0) {
-          var allergensHtml = '<div class="mt-2">';
-          data.allergens.forEach(function(allergen) {
-            allergensHtml += '<span class="badge bg-warning text-dark me-1 mb-1">' + allergen[1] + '</span>';
-          });
-          allergensHtml += '</div>';
-          allergensList.html(allergensHtml);
-        } else {
-          allergensList.html('<div class="text-center"><small class="text-muted">アレルギー情報はありません</small></div>');
-        }
         
         // 商品の合計を更新
         updateProductTotals();
-        // 商品全体のアレルギー情報を更新
-        updateProductAllergens();
       },
       error: function(xhr, status, error) {
         menuInfo.addClass('d-none');
-        allergensList.empty();
         alert("メニュー情報の取得に失敗しました");
       }
     });
@@ -122,8 +106,6 @@ function onLoad() {
   $("#product_menus-container").on('cocoon:after-remove', function() {
     // 項目が削除された後に合計を更新
     updateProductTotals();
-    // 商品全体のアレルギー情報を更新
-    updateProductAllergens();
   });
   
   // 既存のメニューを初期化
@@ -133,32 +115,6 @@ function onLoad() {
     }
   });
 
-  // 商品全体のアレルギー情報を更新
-  function updateProductAllergens() {
-    const $productAllergensList = $('#product-allergens-list');
-    $productAllergensList.empty();
-    
-    // メニューごとのアレルギー情報を収集
-    const allAllergens = new Set();
-    $('.allergens-list .badge').each(function() {
-      const allergenName = $(this).text();
-      if (allergenName && !allergenName.includes('アレルギー情報はありません')) {
-        allAllergens.add(allergenName);
-      }
-    });
-    
-    // アレルギー情報を表示
-    if (allAllergens.size > 0) {
-      Array.from(allAllergens).forEach(function(allergenName) {
-        $productAllergensList.append(
-          `<span class="badge bg-warning text-dark me-2 mb-2">${allergenName}</span>`
-        );
-      });
-      $('#allergens-container').removeClass('d-none');
-    } else {
-      $('#allergens-container').addClass('d-none');
-    }
-  }
 
   // 商品の合計原価と栄養価を計算
   function updateProductTotals() {

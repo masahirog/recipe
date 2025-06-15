@@ -1,7 +1,7 @@
 doctype html
 html
   head
-    title 旬八
+    title レシピ
     meta charset="utf-8"
     meta name="viewport" content="width=device-width, initial-scale=1"
     = csrf_meta_tags
@@ -14,46 +14,16 @@ html
     header
       nav.navbar.navbar-expand-lg.navbar-light.bg-light
         .container-fluid
-          = link_to "旬八", root_path, class: "navbar-brand", style: "margin-left: 20px;"
-          
-          button.navbar-toggler type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            span.navbar-toggler-icon
-
           #navbarNav.collapse.navbar-collapse
-            ul.navbar-nav.me-auto
-              li.nav-item
-                = link_to "献立情報", daily_menus_path, class: "nav-link"
+            ul.navbar-nav
+              li.nav-item.me-3
+                  = link_to "材料", materials_path, class: "dropdown-item"
 
-              li.nav-item.dropdown
-                a.nav-link.dropdown-toggle href="#" id="menuMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-                  | レシピ管理
-                ul.dropdown-menu aria-labelledby="menuMenu"
-                  li = link_to "メニュー", menus_path, class: "dropdown-item"
-                  li = link_to "商品", products_path, class: "dropdown-item"
-
-
-              li.nav-item.dropdown
-                a.nav-link.dropdown-toggle href="#" id="masterMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-                  | マスター管理
-                ul.dropdown-menu aria-labelledby="masterMenu"
-                  li = link_to "店舗管理", stores_path, class: "dropdown-item"
-                  li = link_to "仕入れ業者", vendors_path, class: "dropdown-item"                  
-                  li = link_to "材料", materials_path, class: "dropdown-item"
-                  li = link_to " └ 食品成分", food_ingredients_path, class: "dropdown-item"
-                  li = link_to " └ 原材料管理", raw_materials_path, class: "dropdown-item"
-                  li = link_to "容器管理", containers_path, class: "dropdown-item"
-
-
-
-            ul.navbar-nav.ms-auto
-              - if user_signed_in?
-                li.nav-item
-                  = link_to "ログアウト", destroy_user_session_path, method: :delete, class: "nav-link"
-              - else
-                li.nav-item
-                  = link_to "ログイン", new_user_session_path, class: "nav-link"
-                / li.nav-item
-                /   = link_to "新規登録", new_user_registration_path, class: "nav-link"
+              li.nav-item.me-3
+                = link_to "メニュー", menus_path, class: "dropdown-item"
+              li.nav-item.me-3
+                = link_to "商品", products_path, class: "dropdown-item"
+              
 
     .mt-4.mb-4 style='padding:0px 20px;'
       = render '/shared/notice', notice: notice

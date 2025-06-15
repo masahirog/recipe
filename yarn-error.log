@@ -14,7 +14,7 @@ Platform:
   darwin arm64
 
 Trace: 
-  SyntaxError: /Users/yamashitamasahiro/projects/shunpachi/package.json: Expected double-quoted property name in JSON at position 498 (line 19 column 3)
+  SyntaxError: /Users/yamashitamasahiro/projects/recipe/package.json: Expected double-quoted property name in JSON at position 498 (line 19 column 3)
       at JSON.parse (<anonymous>)
       at /opt/homebrew/lib/node_modules/yarn/lib/cli.js:1625:59
       at Generator.next (<anonymous>)
@@ -23,7 +23,7 @@ Trace:
 
 npm manifest: 
   {
-    "name": "shunpachi",
+    "name": "recipe",
     "version": "1.0.0",
     "main": "index.js",
     "author": "masahirog <masahiro11g@gmail.com>",

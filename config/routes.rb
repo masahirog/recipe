@@ -1,8 +1,5 @@
 Rails.application.routes.draw do
-  root "daily_menus#index" # トップページを日別メニュー一覧に設定
-  devise_for :users
-
-  resources :containers
+  root "products#index"
   resources :vendors
   resources :materials do
     collection do
@@ -27,19 +24,7 @@ Rails.application.routes.draw do
     end
   end
   resources :raw_materials
-  resources :daily_menus do
-    member do
-      post :distribute
-    end
-  end
-  resources :stores
-  resources :food_ingredients do
-    collection do
-      get :search
-    end
-  end
-  get 'calendar', to: 'daily_menus#index', as: :calendar
-
+  
   resources :pdfs do
     collection do
       get :manufacturing_instruction

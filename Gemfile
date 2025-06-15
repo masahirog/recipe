@@ -12,10 +12,8 @@ gem "cssbundling-rails"
 gem "jbuilder"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "bootsnap", require: false
-gem "devise", "~> 4.9"
 gem "slim-rails", "~> 3.7"
 gem 'cocoon'
-gem 'simple_calendar'
 gem "select2-rails"
 gem 'will_paginate'
 gem 'will_paginate-bootstrap-style'

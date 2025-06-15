@@ -9,116 +9,6 @@ function onLoad() {
     $('#how_to_save_field').val(preservationText);
   });
 
-  // 原材料表示自動生成ボタンのイベント処理
-  $(document).on('click', '#generate-raw-materials-btn', function(e) {
-    e.preventDefault(); // フォーム送信を防止
-    
-    // ボタンの状態を更新
-    const $btn = $(this);
-    const originalBtnText = $btn.html();
-    $btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 計算中...').prop('disabled', true);
-    
-    // 商品IDを取得 (data-product-id属性から)
-    const productId = $('#product-id').val();
-    
-    console.log('原材料表示自動生成 - 開始:', { productId: productId });
-    
-    // 現在のフォームデータを取得
-    const formData = new FormData();
-    
-    // 基本的な商品データをフォームから収集
-    formData.append('product[name]', $('#product_name').val());
-    formData.append('product[category]', $('#product_category').val());
-    
-    // プロダクトメニューデータを収集
-    $('.menu-select').each(function(index) {
-      const menuId = $(this).val();
-      if (menuId) {
-        formData.append(`product[product_menus_attributes][${index}][menu_id]`, menuId);
-        
-        // 既存のメニューIDがある場合は追加
-        const existingId = $(this).closest('.nested-fields').find('input[name*="[id]"]').val();
-        if (existingId) {
-          formData.append(`product[product_menus_attributes][${index}][id]`, existingId);
-        }
-        
-        formData.append(`product[product_menus_attributes][${index}][_destroy]`, 'false');
-      }
-    });
-    
-    // CSRF トークン
-    const csrfToken = $('meta[name="csrf-token"]').attr('content');
-    
-    // URLを決定（新規作成か編集かで分岐）
-    let url = '/products/generate_raw_materials';
-    if (productId && productId !== '') {
-      url = `/products/${productId}/generate_raw_materials`;
-    }
-    
-    console.log('原材料表示自動生成 - リクエスト送信:', { url: url, method: 'POST' });
-    
-    // Ajaxリクエスト
-    $.ajax({
-      url: url,
-      type: 'POST',
-      data: formData,
-      processData: false,
-      contentType: false,
-      headers: {
-        'X-CSRF-Token': csrfToken
-      },
-      success: function(response) {
-        console.log('原材料表示自動生成 - 成功:', response);
-        
-        // 原材料表示を更新
-        $('#product_raw_materials_food_contents').val(response.food_contents || '');
-        $('#product_raw_materials_additive_contents').val(response.additive_contents || '');
-        
-        // アレルギー情報を更新
-        updateAllergensDisplay(response.allergens || []);
-        
-        // 成功メッセージを表示
-        showMessage('原材料表示を計算しました', 'success');
-        
-        // ボタンを元に戻す
-        $btn.html(originalBtnText).prop('disabled', false);
-      },
-      error: function(xhr, status, error) {
-        console.error('原材料表示自動生成 - エラー:', {
-          status: status,
-          error: error,
-          response: xhr.responseText
-        });
-        
-        // エラーメッセージを表示
-        showMessage('エラーが発生しました: ' + error, 'danger');
-        
-        // ボタンを元に戻す
-        $btn.html(originalBtnText).prop('disabled', false);
-      }
-    });
-  });
-
-  // アレルギー情報の表示を更新
-  function updateAllergensDisplay(allergens) {
-    const $allergensList = $('#product-allergens-list');
-    $allergensList.empty();
-    
-    if (allergens && allergens.length > 0) {
-      allergens.forEach(function(allergen) {
-        const allergenName = allergen[1];
-        
-        $allergensList.append(
-          `<span class="badge bg-warning text-dark me-2 mb-2">${allergenName}</span>`
-        );
-      });
-      
-      $('#allergens-container').removeClass('d-none');
-    } else {
-      $('#allergens-container').addClass('d-none');
-    }
-  }
-
   // 原価率計算の初期化
   function updateCostRatio() {
     var sellPrice = parseFloat($('.product_sell_price').val()) || 0;
@@ -280,6 +170,59 @@ function onLoad() {
       reader.readAsDataURL(file);
     }
   });
+
+  // 商品一覧の検索機能
+  function initProductSearch() {
+    // Enterキーで検索を実行
+    $('.js-product-search').on('keypress', function(e) {
+      if (e.which === 13) { // Enterキー
+        e.preventDefault();
+        performSearch();
+      }
+    });
+    
+    // カテゴリフィルタのイベント
+    $('.js-category-filter').on('change', function() {
+      performSearch();
+    });
+    
+    // 検索実行関数
+    function performSearch() {
+      const searchText = $('.js-product-search').val();
+      const category = $('.js-category-filter').val();
+      const params = new URLSearchParams();
+      
+      if (searchText) {
+        params.append('search', searchText);
+      }
+      
+      if (category) {
+        params.append('category', category);
+      }
+      
+      // Turboを使用してページを更新
+      const url = window.location.pathname + '?' + params.toString();
+      Turbo.visit(url);
+    }
+    
+    // URLパラメータから初期値を設定
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    const categoryParam = urlParams.get('category');
+    
+    if (searchParam) {
+      $('.js-product-search').val(searchParam);
+    }
+    
+    if (categoryParam) {
+      $('.js-category-filter').val(categoryParam);
+    }
+  }
+
+  // 商品一覧ページの場合のみ検索機能を初期化
+  if ($('.js-product-search').length > 0) {
+    initProductSearch();
+  }
 }
 
 // ページ読み込み時に初期化

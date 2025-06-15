@@ -20,10 +20,6 @@
             small.form-text.text-muted 必須項目です
         .col-md-6
           .mb-3
-            = f.label :container_id, "容器", class: "form-label"
-            = f.collection_select :container_id, Container.all, :id, :name, { include_blank: "容器を選択" }, { class: "form-select" }
-        .col-md-6
-          .mb-3
             = f.label :category, "カテゴリー", class: "form-label required"
             = f.select :category, options_for_select_from_enum(Product, :category), {}, { class: "form-control category required" }
       .row.price
@@ -87,20 +83,7 @@
         = f.text_area :raw_materials_additive_contents, class: "form-control", rows: 3
       
  
-      .mb-3#allergens-container class="#{product.persisted? && product.product_menus.any? ? '' : 'd-none'}"
-        label.form-label アレルギー情報
-        #product-allergens-list.d-flex.flex-wrap
-          - if product.persisted? && product.product_menus.any?
-            - allergens = []
-            - product.product_menus.includes(menu: { menu_materials: { material: :material_allergies } }).each do |pm|
-              - next unless pm.menu
-              - pm.menu.menu_materials.each do |mm|
-                - next unless mm.material
-                - mm.material.material_allergies.each do |ma|
-                  - allergens << ma.allergen if ma.allergen.present?
-            - allergens.uniq.each do |allergen|
-              span.badge.bg-warning.text-dark.me-2.mb-2 = MaterialAllergy.allergens_i18n[allergen]
-
+      
 
 
 

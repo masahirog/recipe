@@ -4,7 +4,7 @@ class MaterialsController < ApplicationController
     material = Material.find(params[:id])
     food_ingredient = material.food_ingredient
     response_data = { 
-      unit: material.recipe_unit_i18n,
+      unit: material.recipe_unit,
       recipe_unit_gram_quantity: material.recipe_unit_gram_quantity,
       recipe_unit_price: material.recipe_unit_price
     }
@@ -34,7 +34,7 @@ class MaterialsController < ApplicationController
   end
 
   def index
-    @materials = Material.includes(:vendor, :food_ingredient).order(id: :desc)
+    @materials = Material.order(id: :desc)
     
     # 検索機能
     if params[:query].present?
@@ -60,7 +60,6 @@ class MaterialsController < ApplicationController
   def create
     @material = Material.new(material_params)
     if @material.save
-      save_allergens(@material)
       redirect_to materials_path, notice: '材料を作成しました。'
     else
       render :new
@@ -74,8 +73,7 @@ class MaterialsController < ApplicationController
     if @material.update(material_params)
       # デバッグ用：更新成功を確認
       Rails.logger.debug "Material updated successfully"
-      
-      save_allergens(@material)
+
       redirect_to materials_path, notice: '材料を更新しました。'
     else
       # デバッグ用：エラーを確認
@@ -100,21 +98,6 @@ class MaterialsController < ApplicationController
     params.require(:material).permit(:vendor_id, :food_ingredient_id, :name, :category, :recipe_unit,
      :recipe_unit_price, :memo, :unused_flag, :recipe_unit_gram_quantity,
     material_raw_materials_attributes: [:id, :raw_material_id, :quantity_ratio, :position, :_destroy])
-  end
-
-  def save_allergens(material)
-    # 既存のアレルゲン情報を削除
-    material.material_allergies.destroy_all
-    
-    # 選択されたアレルゲンを保存
-    if params[:material][:allergens].present?
-      params[:material][:allergens].each do |allergen|
-        next if allergen.blank?
-        material.material_allergies.create!(allergen: allergen)
-      end
-    end
-  rescue => e
-    Rails.logger.error "Failed to save allergens: #{e.message}"
   end
 
 end

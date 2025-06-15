@@ -2,7 +2,22 @@ class ProductsController < ApplicationController
   before_action :set_product, only: %i[edit update destroy]
 
   def index
-    @products = Product.all.paginate(page: params[:page], per_page: 30)
+    @products = Product.all
+    
+    # 検索条件の適用
+    if params[:search].present?
+      @products = @products.where("name LIKE ? OR food_label_name LIKE ?", 
+                                  "%#{params[:search]}%", 
+                                  "%#{params[:search]}%")
+    end
+    
+    # カテゴリフィルタの適用
+    if params[:category].present?
+      @products = @products.where(category: params[:category])
+    end
+    
+    # ページネーション
+    @products = @products.paginate(page: params[:page], per_page: 30)
   end
 
   def new
@@ -36,11 +51,11 @@ class ProductsController < ApplicationController
       render :edit
     end
   end
+  
   def destroy
     @product.destroy
     redirect_to products_path, notice: '商品を削除しました。'
   end
-
 
   def generate_raw_materials
     begin
@@ -62,14 +77,10 @@ class ProductsController < ApplicationController
       # 食品原材料と添加物原材料を計算
       food_contents = calculate_raw_materials_display(@product, 'food')
       additive_contents = calculate_raw_materials_display(@product, 'additive')
-      
-      # アレルギー情報を計算
-      allergens = calculate_allergens(@product)
-      
+            
       render json: {
         food_contents: food_contents,
         additive_contents: additive_contents,
-        allergens: allergens
       }
     rescue => e
       Rails.logger.error("原材料表示の生成中にエラーが発生しました: #{e.message}")
@@ -78,7 +89,6 @@ class ProductsController < ApplicationController
       render json: { error: e.message }, status: :internal_server_error
     end
   end
-
 
   def generate_raw_materials_display
     begin
@@ -94,13 +104,9 @@ class ProductsController < ApplicationController
       food_contents = calculate_raw_materials_display(@product, 'food')
       additive_contents = calculate_raw_materials_display(@product, 'additive')
       
-      # アレルギー情報を計算
-      allergens = calculate_allergens(@product)
-      
       render json: {
         food_contents: food_contents,
         additive_contents: additive_contents,
-        allergens: allergens
       }
     rescue => e
       Rails.logger.error("原材料表示の生成中にエラーが発生しました: #{e.message}")
@@ -122,47 +128,6 @@ class ProductsController < ApplicationController
     :raw_materials_additive_contents, :calorie, :protein, :lipid, :carbohydrate, :salt, 
     :how_to_save, :sales_unit_amount, :unused_flag,
     product_menus_attributes: [:id, :menu_id, :product_id, :row_order, :_destroy])
-  end
-  
-  # calculate_allergens メソッドを修正して、未保存のメニューも処理できるようにする
-  def calculate_allergens(product)
-    all_allergens = []
-    
-    # 永続化されたメニュー
-    if product.persisted?
-      product.product_menus.includes(:menu).each do |product_menu|
-        next unless product_menu.menu
-        collect_allergens_from_menu(product_menu.menu, all_allergens)
-      end
-    end
-    
-    # 新規追加されたメニュー（未保存）
-    if params[:product] && params[:product][:product_menus_attributes]
-      params[:product][:product_menus_attributes].each do |_key, menu_attrs|
-        next if menu_attrs[:_destroy] == "1" || menu_attrs[:menu_id].blank?
-        
-        menu = Menu.find_by(id: menu_attrs[:menu_id])
-        next unless menu
-        
-        collect_allergens_from_menu(menu, all_allergens)
-      end
-    end
-    
-    # 重複を除去して、アレルギー情報をI18n化
-    all_allergens.uniq.map do |allergen| 
-      [allergen, MaterialAllergy.allergens_i18n[allergen]] 
-    end
-  end
-
-  # メニューからアレルギー情報を収集するヘルパーメソッド
-  def collect_allergens_from_menu(menu, allergens_array)
-    menu.menu_materials.includes(:material).each do |menu_material|
-      material = menu_material.material
-      next unless material
-      
-      material_allergens = material.material_allergies.map(&:allergen)
-      allergens_array.concat(material_allergens) if material_allergens.any?
-    end
   end
 
   # calculate_raw_materials_display メソッドも同様に修正

@@ -65,11 +65,11 @@
                       td = menu_material.material.name
                       td.text-center.checkbox-cell □
                       td.text-center 
-                        = "#{number_with_delimiter(format_number(total_amount))} #{menu_material.material.recipe_unit_i18n}"
+                        = "#{number_with_delimiter(format_number(total_amount))} #{menu_material.material.recipe_unit}"
                       td.text-center = menu_material.source_group.present? ? menu_material.source_group : "—"
                       td.text-center = menu_material.preparation.present? ? menu_material.preparation : "—"
                       td.text-center
-                        = "#{format_number(per_person)} #{menu_material.material.recipe_unit_i18n}"
+                        = "#{format_number(per_person)} #{menu_material.material.recipe_unit}"
         
         - if menu.cook_before.present? || menu.cook_on_the_day.present?
           table.process-table
