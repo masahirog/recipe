@@ -11,7 +11,7 @@ WORKDIR /rails
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+    BUNDLE_WITHOUT="development test"
 
 
 # Throw-away build stage to reduce size of final image
@@ -19,7 +19,7 @@ FROM base as build
 
 # Install packages needed to build gems and node modules
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential curl git libvips node-gyp pkg-config python-is-python3 libpq-dev
+    apt-get install --no-install-recommends -y build-essential curl git libvips node-gyp pkg-config python-is-python3 libpq-dev default-libmysqlclient-dev
 
 # Install JavaScript dependencies
 ARG NODE_VERSION=23.7.0
@@ -32,7 +32,8 @@ RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
-RUN bundle install && \
+RUN bundle config set --local without 'development test' && \
+    bundle install --jobs 4 --retry 3 && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
@@ -55,7 +56,7 @@ FROM base
 
 # Install packages needed for deployment - PostgreSQLクライアントライブラリを含む
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libvips libpq5 postgresql-client && \
+    apt-get install --no-install-recommends -y curl libvips libpq5 postgresql-client default-mysql-client && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy built artifacts: gems, application
