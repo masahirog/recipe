@@ -22,6 +22,7 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential curl default-libmysqlclient-dev git libvips node-gyp pkg-config python-is-python3 libpq-dev libpq-dev
 
 
+
 # Install JavaScript dependencies
 ARG NODE_VERSION=23.7.0
 ARG YARN_VERSION=1.22.11
