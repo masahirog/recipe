@@ -26,8 +26,8 @@
   "browserslist": [
     "defaults"
   ],
-   "engines": {
-    "node": "22.x",
+  "engines": {
+    "node": ">=22.x",
     "yarn": "1.22.x"
   }
 }
