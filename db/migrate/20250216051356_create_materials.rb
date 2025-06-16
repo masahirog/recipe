@@ -3,7 +3,7 @@ class CreateMaterials < ActiveRecord::Migration[7.1]
     create_table :materials do |t|
       t.integer :vendor_id
       t.string :name, null: false
-      t.integer :category, null: false
+      t.integer :category
       t.string :recipe_unit, null: false
       t.float :recipe_unit_price, null: false, default: 0
       t.text :memo

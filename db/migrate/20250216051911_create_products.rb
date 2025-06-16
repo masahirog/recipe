@@ -5,7 +5,7 @@ class CreateProducts < ActiveRecord::Migration[7.1]
       t.string :food_label_name, null: false
       t.integer :sell_price, null: false, default: 0
       t.float :cost_price, null: false, default: 0
-      t.integer :category, null: false
+      t.integer :category
       t.text :introduction
       t.text :memo
       t.text :serving_infomation

@@ -7,7 +7,15 @@ rm -f /rails/tmp/pids/server.pid
 # If running the rails server then create or migrate existing database
 if [ "${*}" == "./bin/rails server" ]; then
   echo "Preparing database..."
-  bundle exec rails db:prepare
+  
+  if [ "$RAILS_ENV" = "production" ] && [ "$FORCE_DB_RESET" = "true" ]; then
+    echo "FORCE_DB_RESET is set. Resetting database..."
+    bundle exec rails db:drop || true
+    bundle exec rails db:create
+    bundle exec rails db:schema:load
+  else
+    bundle exec rails db:prepare
+  fi
   
   # Run seed in production
   if [ "$RAILS_ENV" = "production" ]; then
