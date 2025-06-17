@@ -17,7 +17,7 @@ class ProductsController < ApplicationController
     end
     
     # ページネーション
-    @products = @products.paginate(page: params[:page], per_page: 30)
+    @products = @products.order(id: :desc).paginate(page: params[:page], per_page: 30)
   end
 
   def new
