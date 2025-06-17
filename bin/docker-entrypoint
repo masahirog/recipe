@@ -1,29 +1,8 @@
 #!/bin/bash
 set -e
 
-echo "=== Docker entrypoint started ==="
+# Remove a potentially pre-existing server.pid for Rails.
 rm -f /rails/tmp/pids/server.pid
 
-if [ "${*}" == "./bin/rails server" ]; then
-  echo "=== Preparing database ==="
-  
-  # 環境変数でリセットを制御
-  if [ "$RESET_DATABASE" = "true" ]; then
-    echo "!!! RESET_DATABASE is set. Dropping and recreating database !!!"
-    bundle exec rails db:drop RAILS_ENV=production DISABLE_DATABASE_ENVIRONMENT_CHECK=1 || true
-    bundle exec rails db:create RAILS_ENV=production
-    bundle exec rails db:schema:load RAILS_ENV=production
-    bundle exec rails db:seed RAILS_ENV=production
-  else
-    # 通常のマイグレーション処理
-    bundle exec rails db:create || echo "Database already exists"
-    bundle exec rails db:migrate
-    
-    # Seedの実行（エラーを無視）
-    if [ "$RAILS_ENV" = "production" ]; then
-      bundle exec rails db:seed || echo "Seed may have already been run"
-    fi
-  fi
-fi
-
+# Then exec the container's main process (what's set as CMD in the Dockerfile).
 exec "$@"

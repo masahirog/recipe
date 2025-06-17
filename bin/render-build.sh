@@ -22,13 +22,5 @@ echo "=== Precompiling assets ==="
 bundle exec rake assets:precompile
 bundle exec rake assets:clean
 
-# データベースの作成とマイグレーション
-echo "=== Database setup ==="
-bundle exec rake db:create RAILS_ENV=production || true
-bundle exec rake db:migrate RAILS_ENV=production
-
-# seedデータの投入（エラーが発生してもビルドを続行）
-echo "=== Running seeds ==="
-bundle exec rake db:seed RAILS_ENV=production || echo "Seed failed but continuing..."
 
 echo "=== Build process completed ==="
